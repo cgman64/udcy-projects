@@ -1,0 +1,19 @@
+### Winemaking Resources
+
+http://web2.slc.qc.ca/jmc/w05/Wine/results.htm
+https://en.wikipedia.org/wiki/Tartaric_acid
+https://en.wikipedia.org/wiki/Acids_in_wine
+https://www.practicalwinery.com/janfeb09/page5.htm
+https://vinepair.com/articles/what-is-oxidation-in-wine/
+
+### R and Statistics Resources
+
+https://en.wikipedia.org/wiki/Multinomial_logistic_regression
+http://www.statisticssolutions.com/mlr/
+https://www.r-bloggers.com/how-to-multinomial-regression-models-in-r/
+http://jamesmarquezportfolio.com/correlation_matrices_in_r.html
+https://en.wikipedia.org/wiki/Multicollinearity#Remedies_for_multicollinearity
+https://stats.stackexchange.com/questions/119835/correlation-between-a-nominal-iv-and-a-continuous-dv-variable/124618#124618
+https://www.researchgate.net/post/Reference_level_in_a_multiple_regression
+https://stats.idre.ucla.edu/r/dae/multinomial-logistic-regression/
+http://www.princeton.edu/~otorres/LogitR101.pdf
