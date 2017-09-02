@@ -17,5 +17,11 @@ Or simply use View Link below.
 3. resources.txt
 Contains all references used to complete the project.
 
+4. wineQualityInfo.txt
+Citation for source of data set
+
+5. wineQualityReds.csv
+Data set
+
 ### Viewable Link:
 https://htmlpreview.github.io/?https://github.com/cgman64/udcy-projects/blob/master/red-wine-quality/eda_project.html
