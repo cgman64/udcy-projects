@@ -1,0 +1,3 @@
+pipelines
+
+https://stackoverflow.com/questions/33091376/python-what-is-exactly-sklearn-pipeline-pipeline
