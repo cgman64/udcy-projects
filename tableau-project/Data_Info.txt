@@ -1,0 +1,29 @@
+1. Title: Airline Delay Causes
+
+Attribute information:
+
+1 - year (from 2016 to 2017)
+2 - month
+3 - arr_flights
+4 - arr_de15
+5 - carrier_ct
+6 - weather_ct
+7 - nas_ct
+8 - security_ct
+9 - late_aircraft_ct
+10 - arr_cancelled
+11 - arr_diverted
+12 - arr_delay
+13 - carrier_delay
+14 - weather_delay
+15 - nas_delay
+16 - security_delay
+17 - late_aircraft_delay
+
+Description of attributes:
+
+	1 - year: contains years 2016 and 2017.
+	2 - month:
+	3 - arr_flights:  
+
+
