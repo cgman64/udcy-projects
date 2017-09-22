@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+from __future__ import division
 import sys
 import pickle
 sys.path.append("../tools/")
@@ -25,14 +26,27 @@ with open("final_project_dataset.pkl", "r") as data_file:
 ### Task 2: Remove outliers
 if 'TOTAL' in data_dict.keys():
     data_dict.pop('TOTAL', 0)
+if 'THE TRAVEL AGENCY IN THE PARK' in data_dict.keys(): 
+    data_dict.pop('THE TRAVEL AGENCY IN THE PARK', 0)
 ### Task 3: Create new feature(s)
 for name in data_dict:
+    #print "Adding Total Emails:", data_dict[name]['from_messages'], "and", data_dict[name]['to_messages']
     total_emails = data_dict[name]['from_messages'] + data_dict[name]['to_messages']
+    #print "Adding Total POI Emails:", data_dict[name]['from_poi_to_this_person'], "and", data_dict[name]['from_this_person_to_poi']
     total_poi_related_emails = data_dict[name]['from_poi_to_this_person'] + data_dict[name]['from_this_person_to_poi']
     if (total_emails not in [0, 'NaN', 'NaNNaN']) and data_dict[name]['from_poi_to_this_person'] != 'NaN' and data_dict[name]['from_this_person_to_poi'] != 'NaN':
-        data_dict[name]['poi_related_ratio'] = total_poi_related_emails / total_emails
+        data_dict[name]['poi_email_ratio'] = total_poi_related_emails / total_emails
+        #print "RATIO:", data_dict[name]['poi_email_ratio'] , "\n"
     else:
-        data_dict[name]['poi_related_ratio'] = 'NaN'
+        data_dict[name]['poi_email_ratio'] = 'NaN'
+        #print "RATIO:", 'NaN\n'
+# Update features_list
+features_list.append('poi_email_ratio')
+
+#for name in data_dict:
+#    point = data_dict[name]
+#    print point['poi_email_ratio'], "type:", type(point['poi_email_ratio'])
+
 ### Store to my_dataset for easy export below.
 my_dataset = data_dict
 
@@ -48,41 +62,45 @@ labels, features = targetFeatureSplit(data)
 
 # Provided to give you a starting point. Try a variety of classifiers.
 from sklearn.naive_bayes import GaussianNB
-clf = GaussianNB()
-
-
-# Feature Scaling
+from sklearn.svm import SVC
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
+from time import time
+import numpy as np
 from sklearn.preprocessing import MinMaxScaler
-scaler = MinMaxScaler()
-features_rescaled =  scaler.fit_transform(features)
-
-# Select KBest
 from sklearn.feature_selection import SelectKBest
-kbest = SelectKBest(k=5)
-features = kbest.fit_transform(features_rescaled, labels)
-print "\n", kbest.scores_
-
-# PCA
 from sklearn.decomposition import PCA
-pca = PCA(n_components=3)
-pca.fit(features_rescaled)
-print pca.explained_variance_ratio_
-first_pc = pca.components_[0]
-second_pc = pca.components_[1]
 
-# Train
-clf.fit(features, labels)
-# Prediction
-pred = clf.predict(features)
 
-# Accuracy
-from sklearn.metrics import accuracy_score
-accuracy = accuracy_score(pred, labels)
-print "\n", accuracy
 
 # Experimentation with other classifiers (Pipeline).
 from sklearn.pipeline import Pipeline
-pipe = Pipeline([("scale", MinMaxScaler()),("select", SelectKBest(k=9)),("reduce", PCA(n_components=3)), ("classify", GaussianNB())])
+psvm = Pipeline([("scale", MinMaxScaler()),("kbest", SelectKBest()),("pca", PCA()), ("svc", SVC())])
+pgnb = Pipeline([("kbest", SelectKBest()), ("pca", PCA()), ("gnb", GaussianNB())])
+pdt = Pipeline([("kbest", SelectKBest()), ("pca", PCA()), ("tree", DecisionTreeClassifier())])
+prf = Pipeline([("kbest", SelectKBest()), ("pca", PCA()), ("rfc", RandomForestClassifier())])
+plr = Pipeline([("kbest", SelectKBest()), ("pca", PCA()), ("lr", LogisticRegression())])
+
+from sklearn.metrics import f1_score, precision_score, recall_score 
+pdt.set_params(tree__min_samples_split=2, kbest__k=6, pca__n_components=3)
+psvm.set_params(svc__kernel='rbf', kbest__k=6, pca__n_components=3)
+
+
+from tester import test_classifier
+if False:
+    print "DECISION TREE:"
+    test_classifier(pdt, data_dict, features_list)
+    print "\nNAIVE BAYES:"
+    test_classifier(pgnb, data_dict, features_list)
+    print "\nSVC:"
+    test_classifier(psvm, data_dict, features_list)
+    print "\nRANDOM FOREST:"
+    test_classifier(prf, data_dict, features_list)
+    print "\nLOGISTIC REGRESSION:"
+    test_classifier(plr, data_dict, features_list)
+
+clf = Pipeline([("kbest", SelectKBest()), ("pca", PCA()), ("tree", DecisionTreeClassifier())])
 
 ### Task 5: Tune your classifier to achieve better than .3 precision and recall 
 ### using our testing script. Check the tester.py script in the final project
@@ -92,9 +110,25 @@ pipe = Pipeline([("scale", MinMaxScaler()),("select", SelectKBest(k=9)),("reduce
 ### http://scikit-learn.org/stable/modules/generated/sklearn.cross_validation.StratifiedShuffleSplit.html
 
 # Example starting point. Try investigating other evaluation techniques!
-from sklearn.cross_validation import train_test_split
+from sklearn.model_selection import train_test_split
 features_train, features_test, labels_train, labels_test = \
     train_test_split(features, labels, test_size=0.3, random_state=42)
+
+# Ref: http://scikit-learn.org/stable/auto_examples/plot_digits_pipe.html#sphx-glr-auto-examples-plot-digits-pipe-py
+# Ref: https://stackoverflow.com/questions/45394527/do-i-need-to-split-data-when-using-gridsearchcv
+from sklearn.model_selection import GridSearchCV
+parameters = {'tree': {'kbest__k': range(6, 10),'pca__n_components': range(2,6), 'tree__min_samples_split':[2, 5, 7, 9]}}
+# Splitting method change to be more consistent with tester.py
+# Ref: https://discussions.udacity.com/t/how-can-i-get-tester-py-to-print-multiple-accuracy-and-recall-values-for-documentation/301255
+from sklearn.model_selection import StratifiedShuffleSplit
+sss = StratifiedShuffleSplit()
+gs = GridSearchCV(clf, param_grid=parameters['tree'], scoring='f1', cv=sss)
+gs.fit(features_train, labels_train)
+
+clf = gs.best_estimator_
+
+test_classifier(clf, data_dict, features_list)
+
 
 ### Task 6: Dump your classifier, dataset, and features_list so anyone can
 ### check your results. You do not need to change anything below, but make sure
