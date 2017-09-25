@@ -1,0 +1,45 @@
+DECISION TREE:
+Pipeline(steps=[('kbest', SelectKBest(k=6, score_func=<function f_classif at 0x000000000D834978>)), ('pca', PCA(copy=True, iterated_power='auto', n_components=3, random_state=None,
+  svd_solver='auto', tol=0.0, whiten=False)), ('tree', DecisionTreeClassifier(class_weight=None, criterion='gini', max_depth=Non...it=2, min_weight_fraction_leaf=0.0,
+            presort=False, random_state=None, splitter='best'))])
+        Accuracy: 0.82821       Precision: 0.38731      Recall: 0.34800 F1: 0.36661     F2: 0.35521
+        Total predictions: 14000        True positives:  696    False positives: 1101   False negatives: 1304   True negatives: 10899
+
+
+NAIVE BAYES:
+Pipeline(steps=[('kbest', SelectKBest(k=10, score_func=<function f_classif at 0x000000000D834978>)), ('pca', PCA(copy=True, iterated_power='auto', n_components=None, random_state=None,
+  svd_solver='auto', tol=0.0, whiten=False)), ('gnb', GaussianNB(priors=None))])
+        Accuracy: 0.85000       Precision: 0.46749      Recall: 0.35950 F1: 0.40644     F2: 0.37691
+        Total predictions: 14000        True positives:  719    False positives:  819   False negatives: 1281   True negatives: 11181
+
+
+SVC:
+Pipeline(steps=[('scale', MinMaxScaler(copy=True, feature_range=(0, 1))), ('kbest', SelectKBest(k=6, score_func=<function f_classif at 0x000000000D834978>)), ('pca', PCA(copy=True, iterated_power='auto', n_components=3, random_state=None,
+  svd_solver='auto', tol=0.0, whiten=False)), ('svc', SVC(C=1.0, cache...,
+  max_iter=-1, probability=False, random_state=None, shrinking=True,
+  tol=0.001, verbose=False))])
+        Accuracy: 0.85700       Precision: 0.46875      Recall: 0.00750 F1: 0.01476     F2: 0.00934
+        Total predictions: 14000        True positives:   15    False positives:   17   False negatives: 1985   True negatives: 11983
+
+
+RANDOM FOREST:
+Pipeline(steps=[('kbest', SelectKBest(k=10, score_func=<function f_classif at 0x000000000D834978>)), ('pca', PCA(copy=True, iterated_power='auto', n_components=None, random_state=None,
+  svd_solver='auto', tol=0.0, whiten=False)), ('rfc', RandomForestClassifier(bootstrap=True, class_weight=None, criterion='g...imators=10, n_jobs=1, oob_score=False, random_state=None,
+            verbose=0, warm_start=False))])
+        Accuracy: 0.84329       Precision: 0.35860      Recall: 0.12300 F1: 0.18317     F2: 0.14161
+        Total predictions: 14000        True positives:  246    False positives:  440   False negatives: 1754   True negatives: 11560
+
+
+LOGISTIC REGRESSION:
+Pipeline(steps=[('kbest', SelectKBest(k=10, score_func=<function f_classif at 0x000000000D834978>)), ('pca', PCA(copy=True, iterated_power='auto', n_components=None, random_state=None,
+  svd_solver='auto', tol=0.0, whiten=False)), ('lr', LogisticRegression(C=1.0, class_weight=None, dual=False, fit_intercept=True,
+          intercept_scaling=1, max_iter=100, multi_class='ovr', n_jobs=1,
+          penalty='l2', random_state=None, solver='liblinear', tol=0.0001,
+          verbose=0, warm_start=False))])
+        Accuracy: 0.82671       Precision: 0.31826      Recall: 0.18650 F1: 0.23518     F2: 0.20334
+        Total predictions: 14000        True positives:  373    False positives:  799   False negatives: 1627   True negatives: 11201
+
+
+
+Accuracy: 0.81421       Precision: 0.34007      Recall: 0.31950 F1: 0.32947     F2: 0.32341
+        Total predictions: 14000        True positives:  639    False positives: 1240   False negatives: 1361   True negatives: 10760

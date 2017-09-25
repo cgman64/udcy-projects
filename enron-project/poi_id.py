@@ -121,9 +121,15 @@ parameters = {'tree': {'kbest__k': range(6, 10),'pca__n_components': range(2,6),
 # Splitting method change to be more consistent with tester.py
 # Ref: https://discussions.udacity.com/t/how-can-i-get-tester-py-to-print-multiple-accuracy-and-recall-values-for-documentation/301255
 from sklearn.model_selection import StratifiedShuffleSplit
-sss = StratifiedShuffleSplit()
+sss = StratifiedShuffleSplit(random_state=42)
 gs = GridSearchCV(clf, param_grid=parameters['tree'], scoring='f1', cv=sss)
 gs.fit(features_train, labels_train)
+if False:
+    # Selected features
+    selected_feature_indices = gs.best_estimator_.named_steps['kbest'].get_support(indices=True)
+    selected_features = [features_list[1:][i] for i in selected_feature_indices]
+    # feature importances
+    feat_imp = gs.best_estimator_.named_steps['tree'].feature_importances_
 
 clf = gs.best_estimator_
 

@@ -1,3 +1,15 @@
 pipelines
 
 https://stackoverflow.com/questions/33091376/python-what-is-exactly-sklearn-pipeline-pipeline
+http://scikit-learn.org/stable/auto_examples/plot_digits_pipe.html#sphx-glr-auto-examples-plot-digits-pipe-py
+
+
+Feature Scaling and algorithms
+
+https://stats.stackexchange.com/questions/244507/what-algorithms-need-feature-scaling-beside-from-svm
+
+gridsearchCV
+
+https://stackoverflow.com/questions/45394527/do-i-need-to-split-data-when-using-gridsearchcv
+
+https://discussions.udacity.com/t/how-can-i-get-tester-py-to-print-multiple-accuracy-and-recall-values-for-documentation/301255
