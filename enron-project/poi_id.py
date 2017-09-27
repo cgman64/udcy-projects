@@ -8,7 +8,8 @@ sys.path.append("../tools/")
 from feature_format import featureFormat, targetFeatureSplit
 from tester import dump_classifier_and_data
 
-
+import pandas as pd
+import numpy as np
 
 ### Task 1: Select what features you'll use.
 ### features_list is a list of strings, each of which is a feature name.
@@ -22,7 +23,23 @@ features_list = ['poi','salary', 'bonus', 'long_term_incentive','loan_advances',
 ### Load the dictionary containing the dataset
 with open("final_project_dataset.pkl", "r") as data_file:
     data_dict = pickle.load(data_file)
+df = pd.DataFrame.from_dict(data_dict, orient='index')
+df.replace(to_replace='NaN', value=np.nan, inplace=True)
+# Outlier detection
+# Ref: http://stamfordresearch.com/outlier-removal-in-python-using-iqr-rule/
+for feat in features_list[1:]:
+    q75, q25 = np.percentile(df[feat].dropna(), [75, 25])
+    iqr = q75 - q25
 
+    min = q25 - (iqr*1.5)
+    max = q75 + (iqr*1.5)
+    print feat, "outliers:\n"
+    print "Under 25th percentile:", min
+    print df.loc[df[feat] < min,feat]
+    print "\nOver 75th percentile:", max
+    print df.loc[df[feat] > max,feat], "\n"
+    
+# TODO: negative values..
 ### Task 2: Remove outliers
 if 'TOTAL' in data_dict.keys():
     data_dict.pop('TOTAL', 0)
@@ -40,6 +57,7 @@ for name in data_dict:
     else:
         data_dict[name]['poi_email_ratio'] = 'NaN'
         #print "RATIO:", 'NaN\n'
+
 # Update features_list
 features_list.append('poi_email_ratio')
 
@@ -66,8 +84,6 @@ from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
-from time import time
-import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.feature_selection import SelectKBest
 from sklearn.decomposition import PCA
@@ -132,6 +148,24 @@ if True:
     feat_imp = gs.best_estimator_.named_steps['tree'].feature_importances_
 
 clf = gs.best_estimator_
+# Showing Scores of kbest features and feature importances
+scores = clf.named_steps['kbest'].scores_
+selected_feature_indices = clf.named_steps['kbest'].get_support(indices=True)
+selected_features = [features_list[1:][i] for i in selected_feature_indices]
+kbest_scores = {}
+k = 0
+for feat in selected_features:
+    kbest_scores[feat] = scores[k]
+    k += 1
+
+df_kbest_scores = pd.DataFrame.from_dict(kbest_scores, orient='index')
+df_kbest_scores.columns = ['score']
+df_kbest_scores.sort_values(by='score', ascending=False)
+
+# Evaluation on 30% of data
+from sklearn.metrics import classification_report
+pred = gs.predict(features_test)
+print "CLASSIFICATION REPORT:\n", classification_report(labels_test, pred)
 
 test_classifier(clf, data_dict, features_list)
 
