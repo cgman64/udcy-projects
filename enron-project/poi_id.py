@@ -124,7 +124,7 @@ from sklearn.model_selection import StratifiedShuffleSplit
 sss = StratifiedShuffleSplit(random_state=42)
 gs = GridSearchCV(clf, param_grid=parameters['tree'], scoring='f1', cv=sss)
 gs.fit(features_train, labels_train)
-if False:
+if True:
     # Selected features
     selected_feature_indices = gs.best_estimator_.named_steps['kbest'].get_support(indices=True)
     selected_features = [features_list[1:][i] for i in selected_feature_indices]
