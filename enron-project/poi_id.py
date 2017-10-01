@@ -18,13 +18,16 @@ features_list = ['poi','salary', 'bonus', 'long_term_incentive','loan_advances',
                  'deferred_income','exercised_stock_options',
                  'total_stock_value', 'from_poi_to_this_person', 
                  'from_this_person_to_poi', 'shared_receipt_with_poi',
-                 'from_messages', 'to_messages'] # You will need to use more features
+                 'from_messages', 'to_messages']
 
 ### Load the dictionary containing the dataset
 with open("final_project_dataset.pkl", "r") as data_file:
     data_dict = pickle.load(data_file)
 df = pd.DataFrame.from_dict(data_dict, orient='index')
 df.replace(to_replace='NaN', value=np.nan, inplace=True)
+df = df[features_list]
+# Remove negative numbers
+df = df.abs()
 # Outlier detection
 # Ref: http://stamfordresearch.com/outlier-removal-in-python-using-iqr-rule/
 for feat in features_list[1:]:
@@ -33,18 +36,38 @@ for feat in features_list[1:]:
 
     min = q25 - (iqr*1.5)
     max = q75 + (iqr*1.5)
-    print feat, "outliers:\n"
-    print "Under 25th percentile:", min
-    print df.loc[df[feat] < min,feat]
-    print "\nOver 75th percentile:", max
-    print df.loc[df[feat] > max,feat], "\n"
-    
-# TODO: negative values..
+    print feat.upper(), "outliers:\n"
+    print "Under 25th percentile:"
+    if len(df.loc[df[feat] < min,feat]) == 0:
+        print "None"
+    else:
+        print df.loc[df[feat] < min,feat]
+    print "\nOver 75th percentile:"
+    if len(df.loc[df[feat] > max,feat]) == 0:
+        print "None"
+    else:
+        print df.loc[df[feat] > max,feat], "\n"
+# Null ratio
+null_ratio = pd.DataFrame(df[features_list[1:]].isnull().sum() / len(df))
+null_ratio.columns = ['null ratio']
+null_ratio = null_ratio.round(3)
+null_ratio = null_ratio.sort_values(by='null ratio', ascending=False)
+print null_ratio
+# Remove loan_advances feature
+if 'loan_advances' in df.columns:
+    df = df.drop(['loan_advances'], axis=1)
+if 'loan_advances' in features_list:
+    features_list.remove('loan_advances')
+
+# Return data back to dictionary
+df.replace(to_replace=np.nan, value='NaN', inplace=True)  
+data_dict = df.to_dict('index')
 ### Task 2: Remove outliers
 if 'TOTAL' in data_dict.keys():
     data_dict.pop('TOTAL', 0)
 if 'THE TRAVEL AGENCY IN THE PARK' in data_dict.keys(): 
     data_dict.pop('THE TRAVEL AGENCY IN THE PARK', 0)
+
 ### Task 3: Create new feature(s)
 for name in data_dict:
     #print "Adding Total Emails:", data_dict[name]['from_messages'], "and", data_dict[name]['to_messages']
@@ -69,8 +92,39 @@ features_list.append('poi_email_ratio')
 my_dataset = data_dict
 
 ### Extract features and labels from dataset for local testing
+from sklearn.feature_selection import SelectKBest
+
 data = featureFormat(my_dataset, features_list, sort_keys = True)
 labels, features = targetFeatureSplit(data)
+
+df.replace(to_replace='NaN', value=0, inplace=True)
+features_list_df = np.array(df.columns)
+data_df = featureFormat(my_dataset, features_list_df, sort_keys = True)
+labels_df, features_df = targetFeatureSplit(data_df)
+
+selector_df = SelectKBest(k=8)
+selector_df.fit(features_df, labels)
+
+selector_new = SelectKBest(k=8)
+selector_new.fit(features, labels)
+
+
+def print_scores(s, features):
+    selected_feature_indices = s.get_support(indices=True)
+    selected_features = [features[1:][i] for i in selected_feature_indices]
+    kbest_scores = {}
+    k = 0
+    for feat in selected_features:
+        kbest_scores[feat] = s.scores_[k]
+        k += 1
+
+    df_kbest_scores = pd.DataFrame.from_dict(kbest_scores, orient='index')
+    df_kbest_scores.columns = ['score']
+    return df_kbest_scores.sort_values(by='score', ascending=False)
+# Feature scores without new feature
+print_scores(selector_df, features_list)
+# Feature scores with new feature
+print_scores(selector_new, features_list)
 
 ### Task 4: Try a varity of classifiers
 ### Please name your classifier clf for easy export below.
@@ -85,10 +139,8 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import MinMaxScaler
-from sklearn.feature_selection import SelectKBest
+
 from sklearn.decomposition import PCA
-
-
 
 # Experimentation with other classifiers (Pipeline).
 from sklearn.pipeline import Pipeline
@@ -101,7 +153,6 @@ plr = Pipeline([("kbest", SelectKBest()), ("pca", PCA()), ("lr", LogisticRegress
 from sklearn.metrics import f1_score, precision_score, recall_score 
 pdt.set_params(tree__min_samples_split=2, kbest__k=6, pca__n_components=3)
 psvm.set_params(svc__kernel='rbf', kbest__k=6, pca__n_components=3)
-
 
 from tester import test_classifier
 if False:
@@ -116,7 +167,7 @@ if False:
     print "\nLOGISTIC REGRESSION:"
     test_classifier(plr, data_dict, features_list)
 
-clf = Pipeline([("kbest", SelectKBest()), ("pca", PCA()), ("tree", DecisionTreeClassifier())])
+clf = Pipeline([("kbest", SelectKBest()), ("pca", PCA()), ("tree", DecisionTreeClassifier(random_state=42))])
 
 ### Task 5: Tune your classifier to achieve better than .3 precision and recall 
 ### using our testing script. Check the tester.py script in the final project
@@ -144,7 +195,7 @@ if True:
     # Selected features
     selected_feature_indices = gs.best_estimator_.named_steps['kbest'].get_support(indices=True)
     selected_features = [features_list[1:][i] for i in selected_feature_indices]
-    # feature importances
+    # feature importances for decision tree
     feat_imp = gs.best_estimator_.named_steps['tree'].feature_importances_
 
 clf = gs.best_estimator_
@@ -160,7 +211,7 @@ for feat in selected_features:
 
 df_kbest_scores = pd.DataFrame.from_dict(kbest_scores, orient='index')
 df_kbest_scores.columns = ['score']
-df_kbest_scores.sort_values(by='score', ascending=False)
+print df_kbest_scores.sort_values(by='score', ascending=False)
 
 # Evaluation on 30% of data
 from sklearn.metrics import classification_report
