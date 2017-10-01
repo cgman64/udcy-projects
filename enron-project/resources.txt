@@ -1,3 +1,8 @@
+outlier detection
+
+http://datapigtechnologies.com/blog/index.php/highlighting-outliers-in-your-data-with-the-tukey-method/
+http://stamfordresearch.com/outlier-removal-in-python-using-iqr-rule/
+
 pipelines
 
 https://stackoverflow.com/questions/33091376/python-what-is-exactly-sklearn-pipeline-pipeline
