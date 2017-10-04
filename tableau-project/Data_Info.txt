@@ -23,7 +23,20 @@ Attribute information:
 Description of attributes:
 
 	1 - year: contains years 2016 and 2017.
-	2 - month:
-	3 - arr_flights:  
-
+	2 - month: contains all 12 months within the year.
+	3 - arr_flights: Number of arrival flights.
+	4 - arr_de15: Number of arrival flight delays.
+	5 - carrier_ct: Number of delays because of carrier.
+	6 - weather_ct: Number of delays because of weather.
+	7 - nas_ct: Number of delays because of National Airspace System.
+	8 - security_ct: Number of delays because of security procedure.
+	9 - late_aircraft_ct: Number of delays because of late arrival of same aircraft at previous airport.
+	10 - arr_canceled: Number of canceled arrival flights.
+	11 - arr_diverted: Number of diverted arrival flights.
+	12 - arr_delay: arrival flight delay time in minutes.
+	13 - carrier_delay: arrival flight delay, caused by carrier, time in minutes.
+	14 - weather_delay: arrival flight delay, caused by weather, time in minutes.
+	15 - nas_delay: arrival flight delay, caused by NAS, time in minutes.
+	16 - security delay: arrival flight delay, caused by security procedure, time in minutes.
+	17 - late_aircraft_delay: arrival flight delay, caused by late arrival of same aircraft at previous airport, time in minutes.
 
